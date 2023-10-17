@@ -1,0 +1,32 @@
+# Load model directly
+!pip install transformers
+import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+# Load pre-trained FinBERT model and tokenizer
+tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
+model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
+
+# Tokenize a financial sentence
+sentence = "The stock market is not bad or good today."
+inputs = tokenizer(sentence, return_tensors="pt")
+
+# Perform inference to get logits
+with torch.no_grad():
+    outputs = model(**inputs)
+    logits = outputs.logits
+
+# Get probabilities
+probabilities = torch.softmax(logits, dim=1)
+
+# Get the predicted label ID
+predicted_label_id = torch.argmax(probabilities, dim=1).item()
+
+# Map the label ID to the actual label name
+predicted_label = model.config.id2label[predicted_label_id]
+
+# Output results
+print(f"Logits: {logits}")
+print(f"Probabilities: {probabilities}")
+print(f"Predicted Label ID: {predicted_label_id}")
+print(f"Predicted Label: {predicted_label}")
